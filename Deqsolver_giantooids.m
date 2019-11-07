@@ -1,24 +1,25 @@
-
+%%
 clear
 
-%range of shear velocities to model
-ustar1 = linspace(0.05,0.75,200);
+%These parameters can be changed to simulate different conditions
+
+%range of bed shear velocities to model
+ustar1 = linspace(0.05,0.75,200); %[m/s]
 
 %range of equilibrium sizes to calculate
-D1 = (200:100:17000).*10^-6;
+D1 = (200:100:17000).*10^-6; %[m]
 
 %parameters and constants for abrasion rate calcs
-kv = 90*10^4;  %dimensionless tuning parameter
+kv = 90*10^4;  %dimensionless tuning parameter, following Trower et al., 2017
 rho_s = 2800; %[kg/m^3] density of aragonite
 rho_w = 1025; %[kg/m^3] density of seawater
-R = (rho_s - rho_w)/rho_w; %submerged specific density
+R = (rho_s - rho_w)/rho_w; %[dimensionless] submerged specific density
 g = 9.81; %[m/s^2]
 nu = 0.937*10^-6; %[m^2/s] kinematic viscosity of water
 young = 20*10^9; %[Pa] young's modulus
 strength = 1*10^6; %[Pa] tensile strength
 tauc = 0.043; %Critical Shields number.  
-Stc = 9; %critical Stokes threshold for viscous damping
-A1 = 0.36; %dimensionless constant for transport calcs
+Stc = 9; %critical Stokes threshold for viscous damping, following Trower et al., 2017
 intermittency = .01;
 %in general larger bedforms = less frequent movement = smaller value for
 %intermittency in the range (0 1]
@@ -26,8 +27,13 @@ H = 5;  %[m] water depth
 
 %parameters and constants for precipitation rate calcs
 Omega1 = 1:24;
-n = 2.26; %empirical values from Zhong & Mucci 1989
+%kinetic parameters for the generic rate eqn R = k(Omega-1)^n
+n = 2.26; %[dimensionless]
 k = 10^1.11; %[umol/m^2/hr]
+
+%%
+%Do not change these parameters
+
 %preallocate space for the calculate Deq's
 D_fOmega = zeros(length(ustar1),length(Omega1));
 
@@ -43,11 +49,16 @@ Wstar = R3.*10.^(R2+R1);
 ws1 = (R.*g.*nu.*Wstar).^(1./3); %[m/s]
 cdrag1 = (4/3).*(R.*g.*D1)./(ws1.^2);
 
+A1 = 0.36; %dimensionless constant for transport calcs
+
+%calculate precipitation and abrasion rates for each combination of D, u*,
+%and Omega and identify the equilibrium size at which precipitation and
+%abrasion are equal
 for counter1 = 1:length(Omega1)
     Omega = Omega1(counter1);
     Precip_rate = k*(Omega - 1)^n; %[umol/m^2/hr]
     SA_ssa = pi().*D1.^2.*23; %specific surface area estimate
-    Precip_rate_vol = Precip_rate.*10^-6.*10^-3.*100.0869./rho_s.*SA_ssa;
+    Precip_rate_vol = Precip_rate.*10^-6.*10^-3.*100.0869./rho_s.*SA_ssa; %[m^3/hr]
 
     for counter2 = 1:length(ustar1)
         ustar = ustar1(counter2);
@@ -73,6 +84,8 @@ for counter1 = 1:length(Omega1)
     end
 end
 
+%plot contour diagram of equilibrium ooid diameters as a function of bed
+%shear velocity (x axis) vs. Omega (y axis)
 figure
 contourf(ustar1,Omega1,10^3*transpose(D_fOmega),1:14,'ShowText','on')
 xlabel('u_* (m/s)')
