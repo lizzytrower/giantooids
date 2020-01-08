@@ -74,7 +74,7 @@ for counter1 = 1:length(Omega1)
             Rabrasion_mat(m) = Rabrasion;
         end
         
-        dVA = 4*pi().*(D1./2).^2.*Rabrasion_mat; %[m^3/yr]
+        dVA = 4*pi().*(D1./2).^2.*Rabrasion_mat; %[m^3/hr]
 
         differences = (Precip_rate_vol - dVA.*intermittency);
 
